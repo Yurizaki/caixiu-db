@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,6 +71,7 @@ public class CaixiuDbApplication implements CommandLineRunner {
 //        List<User> userList = mongoOps.find(new BasicQuery("{username:'?0'}", "ben"), User.class, "Users");
 
 
+        mongoOperations.dropCollection("Vocabulary");
 
 
         if(mongoOperations.findById("123", User.class, "Users") == null) {
@@ -92,15 +94,20 @@ public class CaixiuDbApplication implements CommandLineRunner {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         while(bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            System.out.println(line);
+            if(!line.startsWith("-")) {
+                System.out.println(line);
 
-            String[] items = line.split(",");
+                String[] items = line.split(",");
 
-            Query query = new Query();
-            query.addCriteria(Criteria.where("chinese").regex(items[0]));
+                Query query = new Query();
+                query.addCriteria(
+                        Criteria.where("chinese").is(items[0])
+                );
+                Update update = new Update();
+                update.set("chinese", items[0].trim());
+                update.set("pinyin", items[1].trim());
 
-            if(mongoOperations.find(query, User.class, "Vocabulary").isEmpty()) {
-                mongoOperations.insert(new Vocabulary(items[0], items[1]), "Vocabulary");
+                mongoOperations.upsert(query, update, "Vocabulary");
             }
         }
     }
