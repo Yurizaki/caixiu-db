@@ -26,4 +26,14 @@ public class Vocabulary {
     public void setPinyin(String pinyin) {
         this.pinyin = pinyin;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj.getClass() == Vocabulary.class) {
+            Vocabulary vocabularyCompare = (Vocabulary) obj;
+            return this.chinese.equals(vocabularyCompare.chinese)
+                    && this.pinyin.equals(vocabularyCompare.pinyin);
+        }
+        return false;
+    }
 }
